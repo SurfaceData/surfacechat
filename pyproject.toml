@@ -1,0 +1,23 @@
+[project]
+name = "surface_chat"
+description = "Serving packages for ML models"
+version = "0.1.0"
+authors = [
+    {name = "Keith Stevens"},
+]
+requires-python = ">=3.9"
+classifiers = [
+    "Framework :: FastChat",
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "bitsandbytes",
+    "fschat[model_worker,webui] @ git+https://github.com/lm-sys/FastChat.git@main",
+    "protobuf",
+    "scipy",
+    "transformers @ git+https://github.com/huggingface/transformers.git@main",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
