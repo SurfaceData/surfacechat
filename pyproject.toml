@@ -11,20 +11,24 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 dependencies = [
-    "pydantic"
+    "pydantic",
+    "tqdm"
 ]
 
 [project.optional-dependencies]
+prep= [
+    "gutenbergpy",
+]
+webui = [
+    "gradio",
+    "openai"
+]
 worker = [
     "bitsandbytes",
     "fschat[model_worker] @ git+https://github.com/lm-sys/FastChat.git@main",
     "protobuf",
     "scipy",
     "transformers @ git+https://github.com/huggingface/transformers.git@main",
-]
-webui = [
-    "gradio",
-    "openai"
 ]
 
 [build-system]
