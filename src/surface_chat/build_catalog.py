@@ -10,50 +10,12 @@ from pydantic import BaseModel
 from tqdm import tqdm
 from typing import List
 
-
-class BookRecord(BaseModel):
-    id: int
-    authors: List[str] = []
-    titles: List[str] = []
-    segments: List[str] = []
-
-
-cache = GutenbergCache.get_cache()
-
-
-def get_authors(book_id: int):
-    cursor = cache.native_query(
-        f"""
-        SELECT
-          a.name
-        FROM
-          book_authors AS ba
-        INNER JOIN 
-          authors AS a
-        ON a.id = ba.authorid
-        WHERE ba.bookid = {book_id}
-    """
-    )
-    return [a[0] for a in cursor]
-
-
-def get_title(book_id: int):
-    cursor = cache.native_query(
-        f"""
-        SELECT
-          name
-        FROM
-          titles
-        WHERE bookid = {book_id}
-    """
-    )
-    return [t[0] for t in cursor]
+from surface_chat.gutenberg import BookRecord, Cache
 
 
 def load_book(book: BookRecord, collection):
     BATCH_SIZE = 100
     for aid, author in enumerate(book.authors):
-        print(f"Loading {len(book.segments)} segments")
         documents = book.segments
         ids = [f"{book.id}:{aid}:{sid}" for sid in range(len(book.segments))]
         metadatas = [
@@ -80,20 +42,11 @@ if __name__ == "__main__":
         "--embedding-model", type=str, default="multi-qa-MiniLM-L6-cos-v1"
     )
     parser.add_argument("--device", type=str, default="cpu")
+    parser.add_argument("--offset", type=int, default=0)
     parser.add_argument("--limit", type=int, default=10)
+    parser.add_argument("--max-segments", type=int, default=1000)
     parser.add_argument("--delete-old", action="store_true")
     args = parser.parse_args()
-    print(args)
-
-    book_cursor = cache.native_query(
-        f"""
-        SELECT
-          *
-        FROM
-          books
-        LIMIT {args.limit}
-    """
-    )
 
     client = chromadb.HttpClient(host=args.vector_url, port=443, ssl=True)
     if args.delete_old:
@@ -110,13 +63,23 @@ if __name__ == "__main__":
     )
 
     author_counts = {}
-    books = [BookRecord(id=b[0]) for b in book_cursor]
+    cache = Cache()
+    books = cache.get_books(args.limit, args.offset)
     for book in tqdm(books):
         try:
-            book.authors = get_authors(book.id)
-            book.titles = get_title(book.id)
+            book.authors = cache.get_authors(book.id)
+            book.titles = cache.get_title(book.id)
             text = strip_headers(get_text_by_id(book.id))
-            book.segments = list(filter(str.strip, str(text[2000:-1000]).split("\\n")))
+            book.segments = list(filter(str.strip, str(text[2000:-1000]).split("\\n")))[
+                : args.max_segments
+            ]
             load_book(book, collection)
+            for author in book.authors:
+                if author in author_counts:
+                    author_counts[author] += 1
+                else:
+                    author_counts[author] = 1
         except Exception as e:
             pass
+    sorted_authors = sorted(author_counts.items(), key=lambda x: x[1], reverse=True)
+    print(sorted_authors[:20])
