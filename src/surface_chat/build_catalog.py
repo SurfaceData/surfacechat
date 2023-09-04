@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import argparse
+import chromadb
+
+from chromadb.utils import embedding_functions
 from gutenbergpy.gutenbergcache import GutenbergCache
 from gutenbergpy.textget import get_text_by_id, strip_headers
 from pydantic import BaseModel
@@ -46,32 +50,73 @@ def get_title(book_id: int):
     return [t[0] for t in cursor]
 
 
-book_cursor = cache.native_query(
+def load_book(book: BookRecord, collection):
+    BATCH_SIZE = 100
+    for aid, author in enumerate(book.authors):
+        print(f"Loading {len(book.segments)} segments")
+        documents = book.segments
+        ids = [f"{book.id}:{aid}:{sid}" for sid in range(len(book.segments))]
+        metadatas = [
+            {
+                "book_id": book.id,
+                "author": author,
+                "segment_id": sid,
+            }
+            for sid in range(len(book.segments))
+        ]
+        for b in range(0, len(ids), BATCH_SIZE):
+            collection.add(
+                ids=ids[b : b + BATCH_SIZE],
+                metadatas=metadatas[b : b + BATCH_SIZE],
+                documents=documents[b : b + BATCH_SIZE],
+            )
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--vector-url", type=str, default="")
+    parser.add_argument("--index-name", type=str, default="sc_writing_style")
+    parser.add_argument(
+        "--embedding-model", type=str, default="multi-qa-MiniLM-L6-cos-v1"
+    )
+    parser.add_argument("--device", type=str, default="cpu")
+    parser.add_argument("--limit", type=int, default=10)
+    parser.add_argument("--delete-old", action="store_true")
+    args = parser.parse_args()
+    print(args)
+
+    book_cursor = cache.native_query(
+        f"""
+        SELECT
+          *
+        FROM
+          books
+        LIMIT {args.limit}
     """
-    SELECT
-      *
-    FROM
-      books
-"""
-)
+    )
 
+    client = chromadb.HttpClient(host=args.vector_url, port=443, ssl=True)
+    if args.delete_old:
+        collections = client.list_collections()
+        for collection in collections:
+            if collection.name == args.index_name:
+                print("Deleting old collection")
+                client.delete_collection(args.index_name)
+    embedding_fn = embedding_functions.SentenceTransformerEmbeddingFunction(
+        model_name=args.embedding_model, device=args.device
+    )
+    collection = client.get_or_create_collection(
+        name=args.index_name, embedding_function=embedding_fn
+    )
 
-author_counts = {}
-books = [BookRecord(id=b[0]) for b in book_cursor]
-for book in tqdm(books):
-    try:
-        book.authors = get_authors(book.id)
-        book.titles = get_title(book.id)
-        # text = strip_headers(get_text_by_id(book.id))
-        # book.segments = list(filter(str.strip, str(text[2000:-1000]).split("\\n")))
-
-        for author in book.authors:
-            if not author in author_counts:
-                author_counts[author] = 0
-            author_counts[author] += 1
-    except Exception as e:
-        print(e)
-
-author_count_list = [(k, v) for k, v in author_counts.items()]
-author_count_list = sorted(author_count_list, key=lambda x: x[1])
-print(author_count_list)
+    author_counts = {}
+    books = [BookRecord(id=b[0]) for b in book_cursor]
+    for book in tqdm(books):
+        try:
+            book.authors = get_authors(book.id)
+            book.titles = get_title(book.id)
+            text = strip_headers(get_text_by_id(book.id))
+            book.segments = list(filter(str.strip, str(text[2000:-1000]).split("\\n")))
+            load_book(book, collection)
+        except Exception as e:
+            pass

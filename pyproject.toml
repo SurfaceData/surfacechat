@@ -17,7 +17,9 @@ dependencies = [
 
 [project.optional-dependencies]
 prep= [
+    "chromadb",
     "gutenbergpy",
+    "sentence-transformers",
 ]
 webui = [
     "gradio",
