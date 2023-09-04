@@ -3,6 +3,7 @@ The gradio demo server for chatting with a single model.
 """
 
 import argparse
+import chromadb
 import datetime
 import gradio as gr
 import json
@@ -14,6 +15,7 @@ import random
 import time
 import uuid
 
+from chromadb.utils import embedding_functions
 from collections import defaultdict
 from pydantic import BaseModel
 from typing import List
@@ -37,8 +39,6 @@ disable_btn = gr.Button.update(interactive=False)
 
 ip_expiration_dict = defaultdict(lambda: 0)
 
-openai_compatible_models_info = {}
-
 
 class Message(BaseModel):
     role: str
@@ -53,11 +53,12 @@ class Conversation(BaseModel):
 
 
 class State:
-    def __init__(self, model_name):
+    def __init__(self, model_name, author_name):
         self.conv = Conversation()
         self.conv_id = uuid.uuid4().hex
         self.skip_next = False
         self.model_name = model_name
+        self.author_name = author_name
 
     def to_gradio_chatbot(self):
         ret = []
@@ -80,6 +81,26 @@ def get_model_list():
     return [d.id for d in models.data]
 
 
+AUTHORS = [
+    "None",
+    "Various",
+    "Shakspeare, William",
+    "Lytton, Edward Bulwer",
+    "Doyle, Sir Arthur Conan",
+    "Balzac, Honore de",
+    "United States. Copyright Office",
+    "Sue, Eugene",
+    "Dumas, Alexander",
+    "Maquet, Auguste",
+    "Churchill, Winston",
+    "White, Stewart Edward",
+    "Hawthorne, Nathaniel",
+    "Twain, Mark",
+    "Wells, Herbert George",
+    "Carroll, Lewis",
+]
+
+
 def load_demo_single(models, url_params):
     selected_model = models[0] if len(models) > 0 else ""
     if "model" in url_params:
@@ -90,11 +111,15 @@ def load_demo_single(models, url_params):
     dropdown_update = gr.Dropdown.update(
         choices=models, value=selected_model, visible=True
     )
+    author_dropdown_update = gr.Dropdown.update(
+        choices=AUTHORS, value=AUTHORS[0], visible=True
+    )
 
     state = None
     return (
         state,
         dropdown_update,
+        author_dropdown_update,
         gr.Chatbot.update(visible=True),
         gr.Textbox.update(visible=True),
         gr.Button.update(visible=True),
@@ -124,11 +149,13 @@ def clear_history(request: gr.Request):
     return (state, [], "") + (disable_btn,) * 5
 
 
-def add_text(state, model_selector, text, request: gr.Request):
+def add_text(state, model_selector, author_selector, text, request: gr.Request):
     ip = request.client.host
 
     if state is None:
-        state = State(model_selector)
+        state = State(model_selector, author_selector)
+    state.model_name = model_selector
+    state.author_name = author_selector
 
     if len(text) <= 0:
         state.skip_next = True
@@ -160,17 +187,47 @@ def post_process_code(code):
     return code
 
 
+SYSTEM_PROMPT = """\
+You are a helpful, respectful and honest assistant with a deep knowledge of code and software design. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.
+
+If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.
+
+When writing answers, use the writing style, vocabulary choice, and sentence structure from the following list snippets:
+{snippets}
+
+"""
+# When writing answers, mimic the writing style of {author_name}.
+
+
 def model_worker_stream_iter(
-    conv,
-    model_name,
+    state,
     temperature,
     repetition_penalty,
     top_p,
     max_new_tokens,
 ):
+    conv = state.conv
+    model_name = state.model_name
+    author_name = state.author_name
+    snippets = []
+    global collection
+    if author_name != "None":
+        results = collection.query(
+            query_texts=conv.messages[-2].content,
+            where={"author": author_name},
+            n_results=100,
+            include=["documents"],
+        )
+        snippets = [f"  - {d}" for d in results["documents"][0]]
+        print(f"found {len(snippets)} snippets")
+    system = SYSTEM_PROMPT.format(snippets="\n".join(snippets), author_name=author_name)
+
+    messages = [{"role": "system", "content": system}] + [
+        m.dict() for m in conv.messages[:-1]
+    ]
     res = openai.ChatCompletion.create(
         model=model_name,
-        messages=[m.dict() for m in conv.messages],
+        messages=messages,
         stream=True,
         temperature=temperature,
         top_p=top_p,
@@ -195,26 +252,24 @@ def bot_response(state, temperature, top_p, max_new_tokens, request: gr.Request)
         return
 
     repetition_penalty = 1.0
-    conv, model_name = state.conv, state.model_name
     stream_iter = model_worker_stream_iter(
-        conv,
-        model_name,
+        state,
         temperature,
         repetition_penalty,
         top_p,
         max_new_tokens,
     )
 
-    conv.messages[-1].content = ""
+    state.conv.messages[-1].content = ""
     yield (state, state.to_gradio_chatbot()) + (disable_btn,) * 5
 
     try:
         for i, data in enumerate(stream_iter):
-            conv.messages[-1].content += data
+            state.conv.messages[-1].content += data
             yield (state, state.to_gradio_chatbot()) + (disable_btn,) * 5
         yield (state, state.to_gradio_chatbot()) + (enable_btn,) * 5
     except Exception as e:
-        conv.messages[-1].content = f"({e})"
+        state.conv.messages[-1].content = f"({e})"
         yield (state, state.to_gradio_chatbot()) + (
             disable_btn,
             disable_btn,
@@ -285,6 +340,15 @@ By using this service, users are required to agree to the following terms: The s
             container=False,
         )
 
+    with gr.Row(elem_id="author_selector_row"):
+        author_selector = gr.Dropdown(
+            choices=AUTHORS,
+            value=AUTHORS[0],
+            interactive=True,
+            show_label=False,
+            container=False,
+        )
+
     chatbot = gr.Chatbot(
         elem_id="chatbot",
         label="Scroll down and start chatting",
@@ -342,23 +406,37 @@ By using this service, users are required to agree to the following terms: The s
     clear_btn.click(clear_history, None, [state, chatbot, textbox] + btn_list)
 
     model_selector.change(clear_history, None, [state, chatbot, textbox] + btn_list)
+    author_selector.change(clear_history, None, [state, chatbot, textbox] + btn_list)
 
     textbox.submit(
-        add_text, [state, model_selector, textbox], [state, chatbot, textbox] + btn_list
+        add_text,
+        [state, model_selector, author_selector, textbox],
+        [state, chatbot, textbox] + btn_list,
     ).then(
         bot_response,
         [state, temperature, top_p, max_output_tokens],
         [state, chatbot] + btn_list,
     )
     send_btn.click(
-        add_text, [state, model_selector, textbox], [state, chatbot, textbox] + btn_list
+        add_text,
+        [state, model_selector, author_selector, textbox],
+        [state, chatbot, textbox] + btn_list,
     ).then(
         bot_response,
         [state, temperature, top_p, max_output_tokens],
         [state, chatbot] + btn_list,
     )
 
-    return state, model_selector, chatbot, textbox, send_btn, button_row, parameter_row
+    return (
+        state,
+        model_selector,
+        author_selector,
+        chatbot,
+        textbox,
+        send_btn,
+        button_row,
+        parameter_row,
+    )
 
 
 def build_demo(models):
@@ -372,6 +450,7 @@ def build_demo(models):
         (
             state,
             model_selector,
+            author_selector,
             chatbot,
             textbox,
             send_btn,
@@ -387,6 +466,7 @@ def build_demo(models):
             [
                 state,
                 model_selector,
+                author_selector,
                 chatbot,
                 textbox,
                 send_btn,
@@ -409,16 +489,22 @@ if __name__ == "__main__":
         help="Whether to generate a public, shareable link.",
     )
     parser.add_argument(
-        "--controller-url",
+        "--chroma-url",
         type=str,
-        default="http://localhost:21001",
-        help="The address of the controller.",
+        default="",
+        help="",
     )
     parser.add_argument(
         "--api-url",
         type=str,
         default="http://localhost:8000",
         help="The address of the API.",
+    )
+    parser.add_argument(
+        "--index",
+        type=str,
+        default="",
+        help="",
     )
     parser.add_argument(
         "--concurrency-count",
@@ -443,6 +529,11 @@ if __name__ == "__main__":
     # Set global variables
     openai.api_key = "EMPTY"
     openai.api_base = f"{args.api_url}/v1"
+
+    global client, collection
+    client = chromadb.HttpClient(host=args.chroma_url, port=443, ssl=True)
+    embedding_fn = embedding_functions.SentenceTransformerEmbeddingFunction()
+    collection = client.get_collection(name=args.index, embedding_function=embedding_fn)
 
     models = get_model_list()
 
