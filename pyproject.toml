@@ -19,7 +19,6 @@ dependencies = [
 prep= [
     "chromadb",
     "datasets",
-    "gutenbergpy",
     "sentence-transformers",
 ]
 webui = [
