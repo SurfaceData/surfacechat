@@ -22,6 +22,7 @@ prep= [
     "sentence-transformers",
 ]
 webui = [
+    "chromadb",
     "gradio",
     "openai"
 ]
