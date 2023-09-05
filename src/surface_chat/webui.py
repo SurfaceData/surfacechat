@@ -83,21 +83,56 @@ def get_model_list():
 
 AUTHORS = [
     "None",
-    "Various",
-    "Shakspeare, William",
-    "Lytton, Edward Bulwer",
-    "Doyle, Sir Arthur Conan",
-    "Balzac, Honore de",
-    "United States. Copyright Office",
-    "Sue, Eugene",
-    "Dumas, Alexander",
-    "Maquet, Auguste",
-    "Churchill, Winston",
-    "White, Stewart Edward",
-    "Hawthorne, Nathaniel",
-    "Twain, Mark",
-    "Wells, Herbert George",
-    "Carroll, Lewis",
+    "Robert Louis Stevenson",
+    "Charles Dickens",
+    "Edgar Rice Burroughs",
+    "Jack London",
+    "L. Frank (Lyman Frank) Baum",
+    "Henry James",
+    "Oscar Wilde",
+    "Joseph Conrad",
+    "H. G. (Herbert George) Wells",
+    "431BCE-350? BCE Xenophon",
+    "Arthur Conan Doyle",
+    "Mark Twain",
+    "Edward Gibbon",
+    "Honoré de Balzac",
+    "Victor Appleton",
+    "Project Gutenberg",
+    "Edith Wharton",
+    "Jerome K. (Jerome Klapka) Jerome",
+    "Thomas Hardy",
+    "Andrew Lang",
+    "Horatio Alger",
+    "Frances Hodgson Burnett",
+    "1265-1321 Dante Alighieri",
+    "Gene Stratton-Porter",
+    "Jane Austen",
+    "Nathaniel Hawthorne",
+    "Booth Tarkington",
+    "Zane Grey",
+    "George Borrow",
+    "B. M. Bower",
+    "Richard Harding Davis",
+    "Kate Douglas Smith Wiggin",
+    "L. M. (Lucy Maud) Montgomery",
+    "Daniel Defoe",
+    "David Graham Phillips",
+    "John Buchan",
+    "Alexandre Dumas",
+    "Thomas Carlyle",
+    "Alice Meynell",
+    "Willa Cather",
+    "George MacDonald",
+    "Rudyard Kipling",
+    "Lewis Carroll",
+    "W. S. (William Schwenck) Gilbert",
+    "Jules Verne",
+    "Anthony Hope",
+    "Wilkie Collins",
+    "Frank Norris",
+    "Sax Rohmer",
+    "Mary Roberts Rinehart",
 ]
 
 
@@ -192,7 +227,7 @@ You are a helpful, respectful and honest assistant with a deep knowledge of code
 
 If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.
 
-When writing answers, use the writing style, vocabulary choice, and sentence structure from the following list snippets:
+You always write your answers using the writing style, vocabulary choice, and sentence structure from the following examples from literary writing:
 {snippets}
 
 """
@@ -212,15 +247,16 @@ def model_worker_stream_iter(
     snippets = []
     global collection
     if author_name != "None":
+        print(author_name)
         results = collection.query(
             query_texts=conv.messages[-2].content,
             where={"author": author_name},
-            n_results=100,
+            n_results=20,
             include=["documents"],
         )
         snippets = [f"  - {d}" for d in results["documents"][0]]
-        print(f"found {len(snippets)} snippets")
     system = SYSTEM_PROMPT.format(snippets="\n".join(snippets), author_name=author_name)
+    print(system)
 
     messages = [{"role": "system", "content": system}] + [
         m.dict() for m in conv.messages[:-1]
