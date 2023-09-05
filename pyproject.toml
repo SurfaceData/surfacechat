@@ -18,6 +18,7 @@ dependencies = [
 [project.optional-dependencies]
 prep= [
     "chromadb",
+    "datasets",
     "gutenbergpy",
     "sentence-transformers",
 ]
