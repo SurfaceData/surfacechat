@@ -17,6 +17,10 @@ def get_name(authors: str):
     return " ".join([name_parts[1], name_parts[0]]).strip()
 
 
+DROP_WORDS = [
+    "CHAPTER",
+    "[Illustration]",
+]
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--vector-url", type=str, default="")
@@ -53,6 +57,14 @@ if __name__ == "__main__":
 
     batch_size = args.batch_size
 
+    def accept_snippet(s: str):
+        if len(s) < 50:
+            return False
+        for word in DROP_WORDS:
+            if word in s:
+                return False
+        return True
+
     def load_book(example):
         metadata = json.loads(example["METADATA"])
         text_id = metadata["text_id"]
@@ -63,8 +75,8 @@ if __name__ == "__main__":
         clean_text = re.sub(r"\r\n\r", " ", example["TEXT"])
         clean_text = re.sub(r"\n", " ", clean_text)
         clean_text = re.sub("\xa0", " ", clean_text)
-        documents = [s.strip() for s in clean_text.split("\r")][: args.limit]
-        documents = [d for d in documents if len(d) > 30]
+        documents = [s.strip() for s in clean_text.split("\r")]
+        documents = list(filter(accept_snippet, documents))[: args.limit]
         ids = [f"{text_id}:{sid}" for sid in range(len(documents))]
         metadatas = [
             {
