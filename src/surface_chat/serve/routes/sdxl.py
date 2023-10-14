@@ -52,6 +52,7 @@ async def check_api_key(
 class ImageGenerateRequest(BaseModel):
     id: str
     prompt: str
+    negative_prompt: str
     lora: str
     height: int = 1024
     width: int = 1024
@@ -77,6 +78,7 @@ async def create_embeddings(request: ImageGenerateRequest) -> ImageGenerateRespo
     full_prompt = f"{lora_model.keyword}, {request.prompt}"
     image = router.base_pipeline(
         prompt=full_prompt,
+        negative_prompt=request.negative_prompt,
         height=request.height,
         width=request.width,
         num_inference_steps=request.num_inference_steps,
@@ -86,9 +88,11 @@ async def create_embeddings(request: ImageGenerateRequest) -> ImageGenerateRespo
     ).images
     image = router.refiner_pipeline(
         prompt=full_prompt,
-        num_inference_steps=request.num_inference_steps,
+        negative_prompt=request.negative_prompt,
+        # Do significantly more steps on the refiner to clean things up.
+        num_inference_steps=request.num_inference_steps * 10,
         guidance_scale=request.guidance_scale,
-        denoising_start=0.8,
+        denoising_start=0.9,
         image=image,
     ).images[0]
 
@@ -134,7 +138,8 @@ def prepare_router():
         use_safetensors=True,
     ).to(app_settings.device)
     base_pipeline.scheduler = DPMSolverMultistepScheduler.from_config(
-        base_pipeline.scheduler.config
+        base_pipeline.scheduler.config,
+        algorithm_type="sde-dpmsolver++",
     )
 
     refiner_pipeline = StableDiffusionXLImg2ImgPipeline.from_pretrained(
@@ -146,7 +151,8 @@ def prepare_router():
         use_safetensors=True,
     ).to(app_settings.device)
     refiner_pipeline.scheduler = DPMSolverMultistepScheduler.from_config(
-        refiner_pipeline.scheduler.config
+        refiner_pipeline.scheduler.config,
+        algorithm_type="sde-dpmsolver++",
     )
 
     for key in LORA_MAP:
