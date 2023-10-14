@@ -4,6 +4,9 @@ from typing import List, Optional
 
 class AppSettings(BaseSettings):
     api_keys: Optional[List[str]] = None
+    device: str = "cpu"
+    image_basedir: str = "./images"
+    fp16: bool = False
 
     class Config:
         env_file = ".env"

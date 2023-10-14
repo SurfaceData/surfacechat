@@ -1,7 +1,7 @@
 [project]
 name = "surface_chat"
 description = "Serving packages for ML models"
-version = "0.1.0"
+version = "0.2.0"
 authors = [
     {name = "Keith Stevens"},
 ]
@@ -11,20 +11,23 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 dependencies = [
-    "fastapi",
-    "loguru",
-    "pydantic",
-    "tqdm"
     "bitsandbytes",
+    "diffusers[torch]",
+    "fastapi",
     "fschat[model_worker]",
+    "loguru",
     "protobuf",
+    "pydantic",
     "scipy",
     "transformers",
-    "vllm",
+    "tqdm",
     "uvicorn",
 ]
 
 [project.optional-dependencies]
+vllm = [
+    "vllm",
+]
 
 [build-system]
 requires = ["setuptools>=61.0"]

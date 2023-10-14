@@ -1,6 +1,5 @@
-# Gutenberg stuff
-gutenbergindex.db
-texts/
+# Local dirs
+images/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
