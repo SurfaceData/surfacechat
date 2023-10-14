@@ -106,7 +106,9 @@ async def create_embeddings(request: ImageGenerateRequest) -> ImageGenerateRespo
             os.path.join(full_output_folder, resized_file),
             compress_level=4,
         )
-    return ImageGenerateResponse(image=image_path)
+    return ImageGenerateResponse(
+        image=os.path.join(app_settings.image_host, "results", full_file)
+    )
 
 
 class LoraModel(BaseModel):

@@ -6,6 +6,7 @@ class AppSettings(BaseSettings):
     api_keys: Optional[List[str]] = None
     device: str = "cpu"
     image_basedir: str = "./images"
+    image_host: str = "http://localhost"
     fp16: bool = False
 
     class Config:
