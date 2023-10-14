@@ -13,26 +13,15 @@ classifiers = [
 dependencies = [
     "pydantic",
     "tqdm"
+    "bitsandbytes",
+    "fschat[model_worker]",
+    "protobuf",
+    "scipy",
+    "transformers",
+    "vllm",
 ]
 
 [project.optional-dependencies]
-prep= [
-    "chromadb",
-    "datasets",
-    "sentence-transformers",
-]
-webui = [
-    "chromadb",
-    "gradio",
-    "openai"
-]
-worker = [
-    "bitsandbytes",
-    "fschat[model_worker] @ git+https://github.com/lm-sys/FastChat.git@main",
-    "protobuf",
-    "scipy",
-    "transformers @ git+https://github.com/huggingface/transformers.git@main",
-]
 
 [build-system]
 requires = ["setuptools>=61.0"]
