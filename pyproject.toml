@@ -11,6 +11,8 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 dependencies = [
+    "fastapi",
+    "loguru",
     "pydantic",
     "tqdm"
     "bitsandbytes",
@@ -19,6 +21,7 @@ dependencies = [
     "scipy",
     "transformers",
     "vllm",
+    "uvicorn",
 ]
 
 [project.optional-dependencies]

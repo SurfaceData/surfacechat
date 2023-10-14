@@ -36,6 +36,8 @@ from fastchat.utils import build_logger, pretty_print_semaphore, get_context_len
 from typing import List, Optional, Union
 from transformers import BitsAndBytesConfig
 
+from surface_chat.serve.controller_types import HeartbeatRequest
+
 worker_id = str(uuid.uuid4())[:8]
 logger = build_logger("model_worker", f"model_worker_{worker_id}.log")
 
@@ -205,7 +207,7 @@ class BaseModelWorker:
     def register_to_controller(self):
         logger.info("Register to controller")
 
-        url = self.controller_addr + "/register_worker"
+        url = self.controller_addr + "/v1/controller/register_worker"
         data = {
             "worker_name": self.worker_addr,
             "check_heart_beat": True,
@@ -222,16 +224,16 @@ class BaseModelWorker:
             f"worker_id: {self.worker_id}. "
         )
 
-        url = self.controller_addr + "/receive_heart_beat"
+        url = self.controller_addr + "/v1/controller/receive_heart_beat"
 
         while True:
             try:
                 ret = requests.post(
                     url,
-                    json={
-                        "worker_name": self.worker_addr,
-                        "queue_length": self.get_queue_length(),
-                    },
+                    json=HeartbeatRequest(
+                        worker_name=self.worker_addr,
+                        queue_length=self.get_queue_length(),
+                    ).dict(),
                     timeout=5,
                 )
                 exist = ret.json()["exist"]
@@ -282,15 +284,16 @@ class BaseModelWorker:
 def load_model(
     model_path: str,
     device: str = "cuda",
+    dtype: torch.dtype = torch.float16,
     quantization_config: Optional[BitsAndBytesConfig] = None,
     revision: str = "main",
 ):
     """Load a model from Hugging Face."""
     kwargs = {
-        "device_map": {"": 0},
+        "device_map": "auto",
         "quantization_config": quantization_config,
         "revision": revision,
-        "torch_dtype": torch.bfloat16,
+        "torch_dtype": dtype,
     }
     print(kwargs)
     adapter = get_model_adapter(model_path)
@@ -308,6 +311,7 @@ class ModelWorker(BaseModelWorker):
         model_names: List[str],
         limit_worker_concurrency: int,
         device: str,
+        dtype: torch.dtype,
         quantization_config: Optional[BitsAndBytesConfig] = None,
         stream_interval: int = 2,
         conv_template: str = None,
@@ -327,6 +331,7 @@ class ModelWorker(BaseModelWorker):
         self.model, self.tokenizer = load_model(
             model_path,
             device=device,
+            dtype=dtype,
             quantization_config=quantization_config,
         )
         self.device = device
@@ -581,15 +586,21 @@ def create_model_worker():
     parser.add_argument("--stream-interval", type=int, default=2)
     parser.add_argument("--no-register", action="store_true")
     parser.add_argument("--load-4bit", action="store_true")
+    # Needs fixing
+    parser.add_argument("--dtype", type=torch.dtype, default=torch.float32)
     args = parser.parse_args()
     logger.info(f"args: {args}")
 
-    quantization_config = BitsAndBytesConfig(
-        load_in_4bit=args.load_4bit,
-        load_in_8bit=args.load_8bit,
-        bnb_4bit_compute_dtype=torch.bfloat16,
-        bnb_4bit_quant_type="nf4",
-        bnb_4bit_use_double_quant=True,
+    quantization_config = (
+        BitsAndBytesConfig(
+            load_in_4bit=args.load_4bit,
+            load_in_8bit=args.load_8bit,
+            bnb_4bit_compute_dtype=args.dtype,
+            bnb_4bit_quant_type="nf4",
+            bnb_4bit_use_double_quant=True,
+        )
+        if args.load_4bit or args.load_8bit
+        else None
     )
 
     worker = ModelWorker(
@@ -600,6 +611,7 @@ def create_model_worker():
         args.model_names,
         args.limit_worker_concurrency,
         device=args.device,
+        dtype=args.dtype,
         stream_interval=args.stream_interval,
         conv_template=args.conv_template,
         quantization_config=quantization_config,
