@@ -14,7 +14,7 @@ dependencies = [
     "bitsandbytes",
     "diffusers[torch]",
     "fastapi",
-    "fschat[model_worker]",
+    "fschat[model_worker,webui]",
     "loguru",
     "protobuf",
     "pydantic",
