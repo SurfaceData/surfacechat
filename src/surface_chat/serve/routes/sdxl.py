@@ -18,6 +18,7 @@ from fastapi.security.http import HTTPAuthorizationCredentials, HTTPBearer
 from loguru import logger
 from pydantic import BaseModel
 from typing import Any, Dict, Generator, List, Optional, Union
+from yaml_settings_pydantic import BaseYamlSettings, YamlSettingsConfigDict
 
 from surface_chat.serve.app_settings import app_settings
 
@@ -27,6 +28,35 @@ router = APIRouter(
 )
 
 get_bearer_token = HTTPBearer(auto_error=False)
+
+
+class AdapterModel(BaseModel):
+    name: str
+    keyword: str = ""
+    type: str
+    url: str
+    info: str
+
+    def path(self):
+        return os.path.join(
+            app_settings.image_basedir,
+            "models/loras",
+            f"sdxl_1.0_{self.type}-{self.name}.safetensors",
+        )
+
+
+class ModelPack(BaseModel):
+    name: str
+    adapters: List[AdapterModel]
+
+
+class ImageSettings(BaseYamlSettings):
+    models: List[ModelPack]
+
+    model_config = YamlSettingsConfigDict(yaml_files="image_config.yaml")
+
+
+image_settings = ImageSettings()
 
 
 async def check_api_key(
@@ -73,9 +103,9 @@ IMAGE_SIZES = [
 
 @router.post("/generate", dependencies=[Depends(check_api_key)])
 async def create_embeddings(request: ImageGenerateRequest) -> ImageGenerateResponse:
-    lora_model = LORA_MAP[request.lora]
-    router.base_pipeline.load_lora_weights(lora_model.path)
-    full_prompt = f"{lora_model.keyword}, {request.prompt}"
+    adapter = LORA_MAP[request.lora]
+    router.base_pipeline.load_lora_weights(adapter.path())
+    full_prompt = f"{adapter.keyword}, {request.prompt}"
     image = router.base_pipeline(
         prompt=full_prompt,
         negative_prompt=request.negative_prompt,
@@ -115,21 +145,6 @@ async def create_embeddings(request: ImageGenerateRequest) -> ImageGenerateRespo
     )
 
 
-class LoraModel(BaseModel):
-    name: str
-    path: str
-    keyword: str
-
-
-LORA_MAP = {
-    "by-makoto-shinkai": LoraModel(
-        name="by-makoto-shinkai",
-        keyword="by Makoto Shinkai",
-        path=f"{app_settings.image_basedir}/models/loras/sdxl_1.0_lora-by-makoto-shinkai.safetensors",
-    ),
-}
-
-
 def prepare_router():
     base_pipeline = StableDiffusionXLPipeline.from_pretrained(
         "stabilityai/stable-diffusion-xl-base-1.0",
@@ -155,10 +170,10 @@ def prepare_router():
         algorithm_type="sde-dpmsolver++",
     )
 
-    for key in LORA_MAP:
-        lora_model = LORA_MAP[key]
-        print(lora_model.path)
-        base_pipeline.load_lora_weights(lora_model.path)
+    for model_pack in image_settings.models:
+        for adapter in model_pack.adapters:
+            base_pipeline.load_lora_weights(adapter.path())
+            LORA_MAP[adapter.name] = adapter
 
     router.base_pipeline = base_pipeline
     router.refiner_pipeline = refiner_pipeline

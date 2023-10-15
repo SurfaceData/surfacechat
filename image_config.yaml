@@ -1,0 +1,33 @@
+models:
+  - name: sdxl_1.0
+    checkpoints:
+      - repo: stabilityai/stable-diffusion-xl-base-1.0
+        model: sd_xl_base_1.0_0.9vae.safetensors
+      - repo: stabilityai/stable-diffusion-xl-refiner-1.0
+        model: sd_xl_refiner_1.0_0.9vae.safetensors
+    adapters:
+      - name: by-makoto-shinkai
+        url: https://civitai.com/api/download/models/131467
+        info: https://civitai.com/models/120855/makoto-shinkai-style-sdxl-10-lora
+        keyword: by Makoto Shinkai
+        type: lora
+      - name: tangbohu-style
+        url: https://civitai.com/api/download/models/133732
+        info: https://civitai.com/models/122748/tang-bohus-painting-style-lora-sdxl-xl
+        keyword: tangbohu style
+        type: lora
+      - name: bloodstainedai
+        url: https://civitai.com/api/download/models/129030
+        info: https://civitai.com/models/118889/bloodstained-xl
+        keyword: Bloodstainedai
+        type: lycoris
+      - name: moebius
+        url: https://civitai.com/api/download/models/134370
+        info: https://civitai.com/models/123274/moebius-sdxl-jean-giraud
+        keyword: moebzxl
+        type: lycoris
+      - name: pixel-art-xl
+        url: https://civitai.com/api/download/models/130580
+        info: https://civitai.com/models/120096/pixel-art-xl
+        keyword: 
+        type: lora

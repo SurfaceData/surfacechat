@@ -18,6 +18,8 @@ dependencies = [
     "loguru",
     "protobuf",
     "pydantic",
+    "pydantic-settings",
+    "yaml-settings-pydantic",
     "scipy",
     "transformers",
     "tqdm",
