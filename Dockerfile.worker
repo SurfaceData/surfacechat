@@ -9,4 +9,4 @@ WORKDIR /app
 
 COPY . .
 
-RUN --mount=type=cache,target=/root/.cache pip3 install -e ".[vllm]"
+RUN --mount=type=cache,target=/root/.cache pip3 install -e .

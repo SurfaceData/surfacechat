@@ -1,10 +1,6 @@
-import aiohttp
-import asyncio
-import httpx
-import json
 import os
-import shortuuid
 import torch
+import yaml
 
 from diffusers import (
     DPMSolverMultistepScheduler,
@@ -16,9 +12,8 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi.security.http import HTTPAuthorizationCredentials, HTTPBearer
 from loguru import logger
-from pydantic import BaseModel
+from pydantic import BaseModel, BaseSettings
 from typing import Any, Dict, Generator, List, Optional, Union
-from yaml_settings_pydantic import BaseYamlSettings, YamlSettingsConfigDict
 
 from surface_chat.serve.app_settings import app_settings
 
@@ -50,13 +45,8 @@ class ModelPack(BaseModel):
     adapters: List[AdapterModel]
 
 
-class ImageSettings(BaseYamlSettings):
+class ImageSettings(BaseModel):
     models: List[ModelPack]
-
-    model_config = YamlSettingsConfigDict(yaml_files="image_config.yaml")
-
-
-image_settings = ImageSettings()
 
 
 async def check_api_key(
@@ -99,6 +89,8 @@ IMAGE_SIZES = [
     ("small", (256, 256)),
     ("medium", (512, 512)),
 ]
+
+LORA_MAP = {}
 
 
 @router.post("/generate", dependencies=[Depends(check_api_key)])
@@ -146,6 +138,10 @@ async def create_embeddings(request: ImageGenerateRequest) -> ImageGenerateRespo
 
 
 def prepare_router():
+    with open("image_config.yaml", "r") as f:
+        config = yaml.safe_load(f)
+        image_settings = ImageSettings(**config)
+
     base_pipeline = StableDiffusionXLPipeline.from_pretrained(
         "stabilityai/stable-diffusion-xl-base-1.0",
         torch_dtype=torch.float16 if app_settings.fp16 else torch.float32,
@@ -172,6 +168,7 @@ def prepare_router():
 
     for model_pack in image_settings.models:
         for adapter in model_pack.adapters:
+            print(adapter.name)
             base_pipeline.load_lora_weights(adapter.path())
             LORA_MAP[adapter.name] = adapter
 
