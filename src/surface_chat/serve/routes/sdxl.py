@@ -13,6 +13,7 @@ from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi.security.http import HTTPAuthorizationCredentials, HTTPBearer
 from loguru import logger
 from pydantic import BaseModel, BaseSettings
+from tqdm import tqdm
 from typing import Any, Dict, Generator, List, Optional, Union
 
 from surface_chat.serve.app_settings import app_settings
@@ -69,6 +70,13 @@ async def check_api_key(
     return None
 
 
+@router.get("/models", dependencies=[Depends(check_api_key)])
+async def list_models() -> List[AdapterModel]:
+    results = list(router.adapter_map.values())
+    results.sort(key=lambda x: x.name)
+    return results
+
+
 class ImageGenerateRequest(BaseModel):
     id: str
     prompt: str
@@ -90,12 +98,10 @@ IMAGE_SIZES = [
     ("medium", (512, 512)),
 ]
 
-LORA_MAP = {}
-
 
 @router.post("/generate", dependencies=[Depends(check_api_key)])
 async def create_embeddings(request: ImageGenerateRequest) -> ImageGenerateResponse:
-    adapter = LORA_MAP[request.lora]
+    adapter = router.adapter_map[request.lora]
     router.base_pipeline.load_lora_weights(adapter.path())
     full_prompt = f"{adapter.keyword}, {request.prompt}"
     image = router.base_pipeline(
@@ -144,7 +150,7 @@ def prepare_router():
 
     base_pipeline = StableDiffusionXLPipeline.from_pretrained(
         "stabilityai/stable-diffusion-xl-base-1.0",
-        torch_dtype=torch.float16 if app_settings.fp16 else torch.float32,
+        torch_dtype=torch.bfloat16 if app_settings.fp16 else torch.float32,
         variant="fp16" if app_settings.fp16 else None,
         use_safetensors=True,
     ).to(app_settings.device)
@@ -157,7 +163,7 @@ def prepare_router():
         "stabilityai/stable-diffusion-xl-refiner-1.0",
         text_encoder_2=base_pipeline.text_encoder_2,
         vae=base_pipeline.vae,
-        torch_dtype=torch.float16 if app_settings.fp16 else torch.float32,
+        torch_dtype=torch.bfloat16 if app_settings.fp16 else torch.float32,
         variant="fp16" if app_settings.fp16 else None,
         use_safetensors=True,
     ).to(app_settings.device)
@@ -166,12 +172,13 @@ def prepare_router():
         algorithm_type="sde-dpmsolver++",
     )
 
+    adapter_map = {}
     for model_pack in image_settings.models:
-        for adapter in model_pack.adapters:
-            print(adapter.name)
+        for adapter in tqdm(model_pack.adapters, desc="Loading adapters..."):
             base_pipeline.load_lora_weights(adapter.path())
-            LORA_MAP[adapter.name] = adapter
+            adapter_map[adapter.name] = adapter
 
+    router.adapter_map = adapter_map
     router.base_pipeline = base_pipeline
     router.refiner_pipeline = refiner_pipeline
     return router
