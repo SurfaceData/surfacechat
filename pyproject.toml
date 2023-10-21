@@ -11,6 +11,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 dependencies = [
+    "llava @ git+https://github.com/fozziethebeat/LLaVA",
     "bitsandbytes",
     "diffusers[torch]",
     "fastapi",
