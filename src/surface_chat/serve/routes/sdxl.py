@@ -1,4 +1,5 @@
 import os
+import requests
 import torch
 import yaml
 
@@ -11,6 +12,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi.security.http import HTTPAuthorizationCredentials, HTTPBearer
+from io import BytesIO
+from PIL import Image
 from loguru import logger
 from pydantic import BaseModel, BaseSettings
 from tqdm import tqdm
@@ -104,7 +107,7 @@ IMAGE_SIZES = [
 
 
 @router.post("/generate", dependencies=[Depends(check_api_key)])
-async def create_embeddings(request: ImageGenerateRequest) -> ImageGenerateResponse:
+async def generate_image(request: ImageGenerateRequest) -> ImageGenerateResponse:
     adapter = router.adapter_map[request.lora]
     router.base_pipeline.load_lora_weights(adapter.path())
     full_prompt = f"{adapter.keyword}, {request.prompt}"
@@ -151,6 +154,23 @@ async def create_embeddings(request: ImageGenerateRequest) -> ImageGenerateRespo
         image=os.path.join(app_settings.image_host, "results", full_file),
         profile=profile,
     )
+
+
+class GenerateProfileRequest(BaseModel):
+    image: str
+    instruction: str
+
+
+class GenerateProfileResponse(BaseModel):
+    profile: str
+
+
+@router.post("/generate-profile", dependencies=[Depends(check_api_key)])
+async def generate_profile(request: GenerateProfileRequest) -> GenerateProfileResponse:
+    response = requests.get(request.image)
+    image = Image.open(BytesIO(response.content))
+    profile = router.llava_generator.generate(image, request.instruction)
+    return GenerateProfileResponse(profile=profile)
 
 
 def prepare_router():

@@ -28,7 +28,8 @@ class LLaVaGenerator:
 
         self.tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=False)
         kwargs = {
-            "device_map": device,
+            "device_map": "auto",
+            "load_in_8bit": True,
             "torch_dtype": self.dtype,
         }
         self.model = LlavaLlamaForCausalLM.from_pretrained(
