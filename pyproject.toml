@@ -11,11 +11,10 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 dependencies = [
-    "llava @ git+https://github.com/fozziethebeat/LLaVA",
-    "bitsandbytes",
+    "llava @ git+https://github.com/haotian-liu/LLaVA",
+    "bitsandbytes==0.41.0",
     "diffusers[torch]",
     "fastapi",
-    "fschat[model_worker,webui]",
     "loguru",
     "protobuf",
     "pydantic<2,>=1",

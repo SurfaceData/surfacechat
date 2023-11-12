@@ -110,7 +110,7 @@ IMAGE_SIZES = [
 async def generate_image(request: ImageGenerateRequest) -> ImageGenerateResponse:
     adapter = router.adapter_map[request.lora]
     router.base_pipeline.load_lora_weights(adapter.path())
-    full_prompt = f"{adapter.keyword}, {request.prompt}"
+    full_prompt = f"{request.prompt}, {adapter.keyword}"
     image = router.base_pipeline(
         prompt=full_prompt,
         negative_prompt=request.negative_prompt,
@@ -118,18 +118,18 @@ async def generate_image(request: ImageGenerateRequest) -> ImageGenerateResponse
         width=request.width,
         num_inference_steps=request.num_inference_steps,
         guidance_scale=request.guidance_scale,
-        denoising_end=0.8,
-        output_type="latent",
-    ).images
-    image = router.refiner_pipeline(
-        prompt=full_prompt,
-        negative_prompt=request.negative_prompt,
-        # Do significantly more steps on the refiner to clean things up.
-        num_inference_steps=request.num_inference_steps * 10,
-        guidance_scale=request.guidance_scale,
-        denoising_start=0.9,
-        image=image,
+        # denoising_end=0.8,
+        # output_type="latent",
     ).images[0]
+    # image = router.refiner_pipeline(
+    #     prompt=full_prompt,
+    #     negative_prompt=request.negative_prompt,
+    #     # Do significantly more steps on the refiner to clean things up.
+    #     num_inference_steps=request.num_inference_steps * 10,
+    #     guidance_scale=request.guidance_scale,
+    #     denoising_start=0.8,
+    #     image=image,
+    # ).images[0]
 
     full_output_folder = f"{app_settings.image_basedir}/results"
     full_file = f"{request.id}_full.png"
@@ -186,21 +186,23 @@ def prepare_router():
     ).to(app_settings.device)
     base_pipeline.scheduler = DPMSolverMultistepScheduler.from_config(
         base_pipeline.scheduler.config,
+        use_karras_sigmas=True,
         algorithm_type="sde-dpmsolver++",
     )
 
-    refiner_pipeline = StableDiffusionXLImg2ImgPipeline.from_pretrained(
-        "stabilityai/stable-diffusion-xl-refiner-1.0",
-        text_encoder_2=base_pipeline.text_encoder_2,
-        vae=base_pipeline.vae,
-        torch_dtype=torch.bfloat16 if app_settings.fp16 else torch.float32,
-        variant="fp16" if app_settings.fp16 else None,
-        use_safetensors=True,
-    ).to(app_settings.device)
-    refiner_pipeline.scheduler = DPMSolverMultistepScheduler.from_config(
-        refiner_pipeline.scheduler.config,
-        algorithm_type="sde-dpmsolver++",
-    )
+    # refiner_pipeline = StableDiffusionXLImg2ImgPipeline.from_pretrained(
+    #     "stabilityai/stable-diffusion-xl-refiner-1.0",
+    #     text_encoder_2=base_pipeline.text_encoder_2,
+    #     vae=base_pipeline.vae,
+    #     torch_dtype=torch.bfloat16 if app_settings.fp16 else torch.float32,
+    #     variant="fp16" if app_settings.fp16 else None,
+    #     use_safetensors=True,
+    # ).to(app_settings.device)
+    # refiner_pipeline.scheduler = DPMSolverMultistepScheduler.from_config(
+    #     refiner_pipeline.scheduler.config,
+    #     use_karras_sigmas=True,
+    #     algorithm_type="sde-dpmsolver++",
+    # )
 
     adapter_map = {}
     for model_pack in image_settings.models:
@@ -213,5 +215,5 @@ def prepare_router():
     )
     router.adapter_map = adapter_map
     router.base_pipeline = base_pipeline
-    router.refiner_pipeline = refiner_pipeline
+    # router.refiner_pipeline = refiner_pipeline
     return router
