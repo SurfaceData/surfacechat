@@ -11,24 +11,83 @@ models:
         info: https://civitai.com/models/120855/makoto-shinkai-style-sdxl-10-lora
         keyword: by Makoto Shinkai
         type: lora
-      - name: tangbohu-style
-        url: https://civitai.com/api/download/models/133732
-        info: https://civitai.com/models/122748/tang-bohus-painting-style-lora-sdxl-xl
-        keyword: tangbohu style
+      - name: claymation 
+        url: https://civitai.com/api/download/models/153730
+        info: https://civitai.com/models/59569/clay-animation
+        keyword: Clay Animation page
         type: lora
-      - name: pixel-art-xl
-        url: https://civitai.com/api/download/models/130580
-        info: https://civitai.com/models/120096/pixel-art-xl
+      - name: diorama
+        url: https://civitai.com/api/download/models/153738
+        info: https://civitai.com/models/60962/diorama
+        keyword: Diorama page
         type: lora
-      - name: treebark
-        url: https://civitai.com/api/download/models/128789
-        info: https://civitai.com/models/68423?modelVersionId=128789
-        keyword: treebark
+      - name: filiphodas
+        url: https://civitai.com/api/download/models/153769
+        info: https://civitai.com/models/66296/filip-hodas-style
+        keyword: Filip Hodas Style page
+        type: lora
+      - name: gemmacorrell
+        url: https://civitai.com/api/download/models/153772
+        info: https://civitai.com/models/66843/gemma-correll-style
+        keyword: Gemma Correll Style page
+        type: lora
+      - name: hasuikawase 
+        url: https://civitai.com/api/download/models/153777
+        info: https://civitai.com/models/104637/hasui-kawase-style
+        keyword: Hasui Kawase Style page
+        type: lora
+      - name: jameseads
+        url: https://civitai.com/api/download/models/153785
+        info: https://civitai.com/models/98833/james-r-eads-style
+        keyword: James R. Eads Style page
+        type: lora
+      - name: jsmin-style
+        url: https://civitai.com/api/download/models/128978
+        info: https://civitai.com/models/118845/jasmine-art-style-sdxl-10
+        keyword: jsmn style
+        type: lora
+      - name: kaynielsen
+        url: https://civitai.com/api/download/models/153882
+        info: https://civitai.com/models/104640/kay-nielsen-style
+        keyword: Kay Nielsen Style page
+        type: lora
+      - name: kirigami
+        url: https://civitai.com/api/download/models/153884
+        info: https://civitai.com/models/72958/kirigami
+        keyword: KIRIGAMI page
         type: lora
       - name: microhouse
         url: https://civitai.com/api/download/models/129054
         info: https://civitai.com/models/118910/paseer-sdxl-microhouse
         keyword: microhouse
+        type: lora
+      - name: ohwx
+        url: https://civitai.com/api/download/models/155638
+        info: https://civitai.com/models/140442/meyoxl
+        keyword: ohwx
+        type: lora
+      - name: papercut
+        url: https://civitai.com/api/download/models/133503
+        info: https://civitai.com/models/122567
+        keyword: papercut
+        type: lora
+      - name: picture-story-book
+        url: https://civitai.com/api/download/models/129548
+        info: https://civitai.com/models/119288/picture-story-book-for-children-xl-xl
+        type: lora
+      - name: pixel-art-xl
+        url: https://civitai.com/api/download/models/130580
+        info: https://civitai.com/models/120096/pixel-art-xl
+        type: lora
+      - name: samdoesarts
+        url: https://civitai.com/api/download/models/132685
+        info: https://civitai.com/models/118739
+        keyword: samdoesarts
+        type: lora
+      - name: tangbohu-style
+        url: https://civitai.com/api/download/models/133732
+        info: https://civitai.com/models/122748/tang-bohus-painting-style-lora-sdxl-xl
+        keyword: tangbohu style
         type: lora
       - name: voxel-style
         url: https://civitai.com/api/download/models/128609
@@ -40,145 +99,113 @@ models:
         info: https://civitai.com/models/120517/watermeloncarvingsdxl
         keyword: watermeloncarving
         type: lora
-      - name: maxmonolith
-        url: https://civitai.com/api/download/models/129117
-        info: https://civitai.com/models/118965/monolith-sd-xl-10
-        keyword: maxmonolith
+      - name: MidCenturyComic
+        url: https://civitai.com/api/download/models/225501?type=Model&format=SafeTensor
+        info: https://civitai.com/models/200386/mid-century-cartoon-style?modelVersionId=225501
+        keyword: MidCenturyComic
         type: lora
-      - name: yanzhi-paper-quilling
-        url: https://civitai.com/api/download/models/135020
-        info: https://civitai.com/models/121009/papercut-sdxl-paper-quilling
-        keyword: yanzhi
+      - name: EnvyOilPastel
+        url: https://civitai.com/api/download/models/225507?type=Model&format=SafeTensor
+        info: https://civitai.com/models/200394/envy-oil-pastel-xl-01?modelVersionId=225507
+        keyword: oil pastel
         type: lora
-      - name: embroidery-style
-        url: https://civitai.com/api/download/models/133177
-        info: https://civitai.com/models/122308/embroidery-style-sdxl
+      - name: LiquidFlowStyle
+        url: https://civitai.com/api/download/models/225007?type=Model&format=SafeTensor
+        info: https://civitai.com/models/199968/liquid-flow-style-sdxl-lora?modelVersionId=225007
+        keyword: watce
         type: lora
-      - name: picture-story-book
-        url: https://civitai.com/api/download/models/129548
-        info: https://civitai.com/models/119288/picture-story-book-for-children-xl-xl
+      - name: SaturatedLandscape
+        url: https://civitai.com/api/download/models/222922?type=Model&format=SafeTensor
+        info: https://civitai.com/models/198162/saturated-landscape-xl-kk?modelVersionId=222922
+        keyword: xl_kk
         type: lora
-      - name: jsmin-style
-        url: https://civitai.com/api/download/models/128978
-        info: https://civitai.com/models/118845/jasmine-art-style-sdxl-10
-        keyword: jsmn style
+      - name: FlatIllustration
+        url: https://civitai.com/api/download/models/219907?type=Model&format=SafeTensor
+        info: https://civitai.com/models/195625/flat-illustration?modelVersionId=219907
+        keyword: chatu
         type: lora
-      - name: ghibli
-        url: https://civitai.com/api/download/models/131471
-        info: https://civitai.com/models/120860/sdxl10-ghibli-style-v1
-        keyword: ghibli
-        type: lora
-      - name: guofeng-chinese-style
-        url: https://civitai.com/api/download/models/130709
-        info: missing
-        type: lora
-      - name: logoredaf
-        url: https://civitai.com/api/download/models/136078
-        info: https://civitai.com/models/124609
-        keyword: logoredaf
-        type: lora
-      - name: samdoesarts
-        url: https://civitai.com/api/download/models/132685
-        info: https://civitai.com/models/118739
-        keyword: samdoesarts
-        type: lora
-      - name: papercut
-        url: https://civitai.com/api/download/models/133503
-        info: https://civitai.com/models/122567
-        keyword: papercut
-        type: lora
-      - name: jameseads
-        url: https://civitai.com/api/download/models/153785
-        info: https://civitai.com/models/98833/james-r-eads-style
-        keyword: James R. Eads Style page
-        type: lora
-      - name: hasuikawase 
-        url: https://civitai.com/api/download/models/153777
-        info: https://civitai.com/models/104637/hasui-kawase-style
-        keyword: Hasui Kawase Style page
-        type: lora
-      - name: ohwx
-        url: https://civitai.com/api/download/models/155638
-        info: https://civitai.com/models/140442/meyoxl
-        keyword: ohwx
-        type: lora
-      - name: johnjamesaudubon 
-        url: https://civitai.com/api/download/models/153843
-        info: https://civitai.com/models/101988/john-james-audubon-style
-        keyword: John James Audubon Style page
-        type: lora
-      - name: johnharris
-        url: https://civitai.com/api/download/models/153842
-        info: https://civitai.com/models/101986/john-harris-style
-        keyword: John Harris Style page
-        type: lora
-      - name: plasmatech
-        url: https://civitai.com/api/download/models/156236
-        info: https://civitai.com/models/140954/plasma-tech-xl
-        keyword: DonMPl4sm4T3chXL 
-        type: lora
-      - name: johnberkey
-        url: https://civitai.com/api/download/models/153838
-        info: https://civitai.com/models/71182/john-berkey-style
-        keyword: John Berkey Style page
-        type: lora
-      - name: jessiewillcox
-        url: https://civitai.com/api/download/models/153835
-        info: https://civitai.com/models/100705/jessie-willcox-smith-style
-        keyword: Jessie Willcox Smith Style page
-        type: lora
-      - name: immortal
-        url: https://civitai.com/api/download/models/156022
-        info: https://civitai.com/models/140768/paseer-sdxl-immortal-fairy
-        keyword: Immortal
-        type: lora
-      - name: kirigami
-        url: https://civitai.com/api/download/models/153884
-        info: https://civitai.com/models/72958/kirigami
-        keyword: KIRIGAMI page
-        type: lora
-      - name: kaynielsen
-        url: https://civitai.com/api/download/models/153882
-        info: https://civitai.com/models/104640/kay-nielsen-style
-        keyword: Kay Nielsen Style page
-        type: lora
-      - name: liamwong
-        url: https://civitai.com/api/download/models/153894
-        info: https://civitai.com/models/73318/liam-wong-style
-        keyword: Liam Wong Style page
-        type: lora
-      - name: josephwright 
-        url: https://civitai.com/api/download/models/153849
-        info: https://civitai.com/models/103378/joseph-wright-of-derby-style
-        keyword: Joseph Wright Of Derby Style page
-        type: lora
-      - name: gemmacorrell
-        url: https://civitai.com/api/download/models/153772
-        info: https://civitai.com/models/66843/gemma-correll-style
-        keyword: Gemma Correll Style page
-        type: lora
-      - name: filiphodas
-        url: https://civitai.com/api/download/models/153769
-        info: https://civitai.com/models/66296/filip-hodas-style
-        keyword: Filip Hodas Style page
-        type: lora
-      - name: dixit 
-        url: https://civitai.com/api/download/models/153737
-        info: https://civitai.com/models/34608/dixit-card-generator
-        keyword: Dixit Card Generator page
-        type: lora
-      - name: diorama
-        url: https://civitai.com/api/download/models/153738
-        info: https://civitai.com/models/60962/diorama
-        keyword: Diorama page
-        type: lora
-      - name: claymation 
-        url: https://civitai.com/api/download/models/153730
-        info: https://civitai.com/models/59569/clay-animation
-        keyword: Clay Animation page
-        type: lora
-      - name: centurybotanical
-        url: https://civitai.com/api/download/models/153725
-        info: https://civitai.com/models/64285/century-botanical-illustration
-        keyword: Century Botanical Illustration page
-        type: lora
+
+# Unreliable
+#       - name: centurybotanical
+#         url: https://civitai.com/api/download/models/153725
+#         info: https://civitai.com/models/64285/century-botanical-illustration
+#         keyword: Century Botanical Illustration page
+#         type: lora
+#       - name: dixit 
+#         url: https://civitai.com/api/download/models/153737
+#         info: https://civitai.com/models/34608/dixit-card-generator
+#         keyword: Dixit Card Generator page
+#         type: lora
+#       - name: embroidery-style
+#         url: https://civitai.com/api/download/models/133177
+#         info: https://civitai.com/models/122308/embroidery-style-sdxl
+#         type: lora
+#       - name: ghibli
+#         url: https://civitai.com/api/download/models/131471
+#         info: https://civitai.com/models/120860/sdxl10-ghibli-style-v1
+#         keyword: ghibli
+#         type: lora
+#       - name: guofeng-chinese-style
+#         url: https://civitai.com/api/download/models/130709
+#         info: missing
+#         type: lora
+#       - name: immortal
+#         url: https://civitai.com/api/download/models/156022
+#         info: https://civitai.com/models/140768/paseer-sdxl-immortal-fairy
+#         keyword: Immortal
+#         type: lora
+#       - name: jessiewillcox
+#         url: https://civitai.com/api/download/models/153835
+#         info: https://civitai.com/models/100705/jessie-willcox-smith-style
+#         keyword: Jessie Willcox Smith Style page
+#         type: lora
+#       - name: johnberkey
+#         url: https://civitai.com/api/download/models/153838
+#         info: https://civitai.com/models/71182/john-berkey-style
+#         keyword: John Berkey Style page
+#         type: lora
+#       - name: johnharris
+#         url: https://civitai.com/api/download/models/153842
+#         info: https://civitai.com/models/101986/john-harris-style
+#         keyword: John Harris Style page
+#         type: lora
+#       - name: johnjamesaudubon 
+#         url: https://civitai.com/api/download/models/153843
+#         info: https://civitai.com/models/101988/john-james-audubon-style
+#         keyword: John James Audubon Style page
+#         type: lora
+#       - name: josephwright 
+#         url: https://civitai.com/api/download/models/153849
+#         info: https://civitai.com/models/103378/joseph-wright-of-derby-style
+#         keyword: Joseph Wright Of Derby Style page
+#         type: lora
+#       - name: liamwong
+#         url: https://civitai.com/api/download/models/153894
+#         info: https://civitai.com/models/73318/liam-wong-style
+#         keyword: Liam Wong Style page
+#         type: lora
+#       - name: logoredaf
+#         url: https://civitai.com/api/download/models/136078
+#         info: https://civitai.com/models/124609
+#         keyword: logoredaf
+#         type: lora
+#       - name: maxmonolith
+#         url: https://civitai.com/api/download/models/129117
+#         info: https://civitai.com/models/118965/monolith-sd-xl-10
+#         keyword: maxmonolith
+#         type: lora
+#       - name: plasmatech
+#         url: https://civitai.com/api/download/models/156236
+#         info: https://civitai.com/models/140954/plasma-tech-xl
+#         keyword: DonMPl4sm4T3chXL 
+#         type: lora
+#       - name: treebark
+#         url: https://civitai.com/api/download/models/128789
+#         info: https://civitai.com/models/68423?modelVersionId=128789
+#         keyword: treebark
+#         type: lora
+#       - name: yanzhi-paper-quilling
+#         url: https://civitai.com/api/download/models/135020
+#         info: https://civitai.com/models/121009/papercut-sdxl-paper-quilling
+#         keyword: yanzhi
+#         type: lora

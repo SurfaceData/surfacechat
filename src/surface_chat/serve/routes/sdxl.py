@@ -9,18 +9,16 @@ from diffusers import (
     StableDiffusionXLImg2ImgPipeline,
 )
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.exceptions import RequestValidationError
-from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi.security.http import HTTPAuthorizationCredentials, HTTPBearer
 from io import BytesIO
 from PIL import Image
-from loguru import logger
-from pydantic import BaseModel, BaseSettings
+from pydantic import BaseModel
 from tqdm import tqdm
-from typing import Any, Dict, Generator, List, Optional, Union
+from typing import List, Optional
 
 from surface_chat.llava_generator import LLaVaGenerator
 from surface_chat.serve.app_settings import app_settings
+from surface_chat.serve.types import AdapterModel, ImageSettings
 
 router = APIRouter(
     prefix="/sdxl",
@@ -28,30 +26,6 @@ router = APIRouter(
 )
 
 get_bearer_token = HTTPBearer(auto_error=False)
-
-
-class AdapterModel(BaseModel):
-    name: str
-    keyword: str = ""
-    type: str
-    url: str
-    info: str
-
-    def path(self):
-        return os.path.join(
-            app_settings.image_basedir,
-            "models/loras",
-            f"sdxl_1.0_{self.type}-{self.name}.safetensors",
-        )
-
-
-class ModelPack(BaseModel):
-    name: str
-    adapters: List[AdapterModel]
-
-
-class ImageSettings(BaseModel):
-    models: List[ModelPack]
 
 
 async def check_api_key(
