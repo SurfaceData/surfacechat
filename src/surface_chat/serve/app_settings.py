@@ -7,6 +7,7 @@ class AppSettings(BaseSettings):
     device: str = "cpu"
     image_basedir: str = "./images"
     image_host: str = "http://localhost"
+    civitai_key: str = ""
     fp16: bool = False
 
     class Config:

@@ -16,6 +16,7 @@ dependencies = [
     "diffusers[torch]",
     "fastapi",
     "loguru",
+    "omegaconf",
     "protobuf",
     "pydantic<2,>=1",
     "python-dotenv",

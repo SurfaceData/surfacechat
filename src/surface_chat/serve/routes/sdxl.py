@@ -152,18 +152,30 @@ def prepare_router():
         config = yaml.safe_load(f)
         image_settings = ImageSettings(**config)
 
-    base_pipeline = StableDiffusionXLPipeline.from_pretrained(
-        "stabilityai/stable-diffusion-xl-base-1.0",
-        torch_dtype=torch.bfloat16 if app_settings.fp16 else torch.float32,
-        variant="fp16" if app_settings.fp16 else None,
-        use_safetensors=True,
-    ).to(app_settings.device)
-    base_pipeline.scheduler = DPMSolverMultistepScheduler.from_config(
-        base_pipeline.scheduler.config,
-        use_karras_sigmas=True,
-        algorithm_type="sde-dpmsolver++",
-    )
-
+    model_pack = image_settings.models[0]
+    if model_pack.base.type == "pretrained":
+        base_pipeline = StableDiffusionXLPipeline.from_pretrained(
+            model_pack.base.url,
+            torch_dtype=torch.bfloat16 if app_settings.fp16 else torch.float32,
+            variant="fp16" if app_settings.fp16 else None,
+            use_safetensors=True,
+        ).to(app_settings.device)
+        base_pipeline.scheduler = DPMSolverMultistepScheduler.from_config(
+            base_pipeline.scheduler.config,
+            use_karras_sigmas=True,
+            algorithm_type="sde-dpmsolver++",
+        )
+    if model_pack.base.type == "single":
+        base_pipeline = StableDiffusionXLPipeline.from_single_file(
+            model_pack.base.path(),
+            torch_dtype=torch.bfloat16 if app_settings.fp16 else torch.float32,
+            use_safetensors=True,
+        ).to(app_settings.device)
+        base_pipeline.scheduler = DPMSolverMultistepScheduler.from_config(
+            base_pipeline.scheduler.config,
+            use_karras_sigmas=True,
+            algorithm_type="sde-dpmsolver++",
+        )
     # refiner_pipeline = StableDiffusionXLImg2ImgPipeline.from_pretrained(
     #     "stabilityai/stable-diffusion-xl-refiner-1.0",
     #     text_encoder_2=base_pipeline.text_encoder_2,

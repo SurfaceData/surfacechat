@@ -1,5 +1,9 @@
 models:
   - name: sdxl_1.0
+    base:
+      name: albedobase
+      url: https://civitai.com/api/download/models/281176
+      type: single
     checkpoints:
       - repo: stabilityai/stable-diffusion-xl-base-1.0
         model: sd_xl_base_1.0_0.9vae.safetensors
@@ -119,12 +123,73 @@ models:
         info: https://civitai.com/models/198162/saturated-landscape-xl-kk?modelVersionId=222922
         keyword: xl_kk
         type: lora
+      # New To Test
+      - name: ParticlesStyle
+        url: https://civitai.com/api/download/models/315617?type=Model&format=SafeTensor
+        info: https://civitai.com/models/280264/particles-style-sdxl?modelVersionId=315617
+        keyword: ais-particlez
+        type: lora
       - name: FlatIllustration
         url: https://civitai.com/api/download/models/219907?type=Model&format=SafeTensor
         info: https://civitai.com/models/195625/flat-illustration?modelVersionId=219907
         keyword: chatu
         type: lora
-
+      - name: Dynamink
+        url: https://civitai.com/api/download/models/315843?type=Model&format=SafeTensor
+        info: https://civitai.com/models/280488/dynamink?modelVersionId=315843
+        keyword: dynamink
+        type: lora
+      - name: PapierMache
+        url: https://civitai.com/api/download/models/313971?type=Model&format=SafeTensor
+        info: https://civitai.com/models/278736/papier-mache-style-sdxl?modelVersionId=313971
+        keyword: ais-papiermache
+        type: lora
+      - name: PlasticToy
+        url: https://civitai.com/api/download/models/313948?type=Model&format=SafeTensor
+        info: https://civitai.com/models/278714/plastic-toy-style-sdxl?modelVersionId=313948
+        keyword: ais-plasticz
+        type: lora
+      - name: VintageMarker
+        url: https://civitai.com/api/download/models/311129?type=Model&format=SafeTensor
+        info: https://civitai.com/models/276054/vintage-marker?modelVersionId=311129
+        keyword: Marker Illustration
+        type: lora
+      - name: BricksStyle
+        url: https://civitai.com/api/download/models/309511?type=Model&format=SafeTensor
+        info: https://civitai.com/models/274576/bricks-style-sdxl?modelVersionId=309511
+        keyword: ais-brickz
+        type: lora
+      - name: ImpossibleGeometry
+        url: https://civitai.com/api/download/models/309330?type=Model&format=SafeTensor
+        info: https://civitai.com/models/274425/sdxl-impossible-geometry?modelVersionId=309330
+        keyword: otclillsn
+        type: lora
+      - name: ImpossibleGeometry
+        url: https://civitai.com/api/download/models/309330?type=Model&format=SafeTensor
+        info: https://civitai.com/models/274425/sdxl-impossible-geometry?modelVersionId=309330
+        keyword: otclillsn
+        type: lora
+      - name: SnowLandscapes
+        url: https://civitai.com/api/download/models/319619?type=Model&format=SafeTensor
+        info: https://civitai.com/models/284029/snowy-landscapes?modelVersionId=319619
+        keyword: snowy landscapes
+        type: lora
+      - name: MechDystopia
+        url: https://civitai.com/api/download/models/316333?type=Model&format=SafeTensor
+        info: https://civitai.com/models/280969/mech-dystopia-style-sdxl-and-sd15?modelVersionId=316333
+        keyword: ais-mechdystopia
+        type: lora
+      - name: LeLo
+        url: https://civitai.com/api/download/models/318915?type=Model&format=SafeTensor
+        info: https://civitai.com/models/92444/lelo-lego-lora-for-xl-and-sd15?modelVersionId=318915
+        keyword: LEGO MiniFig
+        type: lora
+      - name: ParchArt
+        url: https://civitai.com/api/download/models/318677?type=Model&format=SafeTensor
+        info: https://civitai.com/models/141471/parchartxl?modelVersionId=318677
+        keyword: on parchment
+        type: lora
+#
 # Unreliable
 #       - name: centurybotanical
 #         url: https://civitai.com/api/download/models/153725
