@@ -1,7 +1,7 @@
 [project]
 name = "surface_chat"
 description = "Serving packages for ML models"
-version = "0.4.1"
+version = "0.5.1"
 authors = [
     {name = "Keith Stevens"},
 ]
@@ -11,8 +11,6 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 dependencies = [
-    "llava @ git+https://github.com/haotian-liu/LLaVA",
-    "bitsandbytes==0.41.0",
     "diffusers[torch]",
     "fastapi",
     "loguru",
@@ -25,11 +23,6 @@ dependencies = [
     "tqdm",
     "transformers>=4.31.0",
     "uvicorn",
-]
-
-[project.optional-dependencies]
-vllm = [
-    "vllm",
 ]
 
 [build-system]

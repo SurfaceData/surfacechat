@@ -1,5 +1,4 @@
 import os
-import requests
 import torch
 import yaml
 
@@ -10,13 +9,10 @@ from diffusers import (
 )
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security.http import HTTPAuthorizationCredentials, HTTPBearer
-from io import BytesIO
-from PIL import Image
 from pydantic import BaseModel
 from tqdm import tqdm
 from typing import List, Optional
 
-from surface_chat.llava_generator import LLaVaGenerator
 from surface_chat.serve.app_settings import app_settings
 from surface_chat.serve.types import AdapterModel, ImageSettings
 
@@ -120,31 +116,11 @@ async def generate_image(request: ImageGenerateRequest) -> ImageGenerateResponse
             compress_level=4,
         )
 
-    if request.profile_generate:
-        profile = router.llava_generator.generate(image, request.profile_instruction)
-    else:
-        profile = ""
+    profile = ""
     return ImageGenerateResponse(
         image=os.path.join(app_settings.image_host, "results", full_file),
         profile=profile,
     )
-
-
-class GenerateProfileRequest(BaseModel):
-    image: str
-    instruction: str
-
-
-class GenerateProfileResponse(BaseModel):
-    profile: str
-
-
-@router.post("/generate-profile", dependencies=[Depends(check_api_key)])
-async def generate_profile(request: GenerateProfileRequest) -> GenerateProfileResponse:
-    response = requests.get(request.image)
-    image = Image.open(BytesIO(response.content))
-    profile = router.llava_generator.generate(image, request.instruction)
-    return GenerateProfileResponse(profile=profile)
 
 
 def prepare_router():
@@ -196,9 +172,6 @@ def prepare_router():
             base_pipeline.load_lora_weights(adapter.path())
             adapter_map[adapter.name] = adapter
 
-    router.llava_generator = LLaVaGenerator(
-        app_settings.device, "liuhaotian/llava-v1.5-13b"
-    )
     router.adapter_map = adapter_map
     router.base_pipeline = base_pipeline
     # router.refiner_pipeline = refiner_pipeline
